@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReinDriveGen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+            padding: 0 2rem;
+        }
+        nav .nav-inner {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 56px;
+        }
+        nav .logo { font-weight: 700; font-size: 0.95rem; color: #111; letter-spacing: -0.02em; }
+        nav .logo span { color: #2563eb; }
+        nav .nav-links { display: flex; gap: 1.8rem; }
+        nav .nav-links a {
+            color: #666; font-size: 0.82rem; text-decoration: none;
+            font-weight: 500; transition: color 0.2s;
+        }
+        nav .nav-links a:hover { color: #111; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: -50%; left: -50%; right: -50%; bottom: -50%;
+            background: radial-gradient(ellipse at center, rgba(37,99,235,0.06) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; }
+
+        /* Icon buttons row */
+        .hero-buttons {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+        }
+        .hero-btn {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.5rem 1.2rem; border-radius: 100px;
+            font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; transition: all 0.2s;
+            border: 1px solid rgba(0,0,0,0.12);
+        }
+        .hero-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .hero-btn.btn-arxiv {
+            background: #b31b1b; color: #fff; border-color: #b31b1b;
+        }
+        .hero-btn.btn-arxiv:hover { background: #8f1616; border-color: #8f1616; }
+        .hero-btn.btn-code {
+            background: #fff; color: #555; border-color: rgba(0,0,0,0.15);
+        }
+        .hero-btn.btn-code:hover { border-color: rgba(0,0,0,0.3); color: #333; }
+        .hero-btn .btn-note {
+            font-weight: 400; font-size: 0.72rem; color: #999;
+        }
+        .hero-btn.btn-code .btn-note { color: #aaa; }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700; color: #111;
+            line-height: 1.15; letter-spacing: -0.03em;
+            margin-bottom: 1.2rem;
+        }
+        .hero h1 em { color: #2563eb; font-style: normal; }
+        .hero .subtitle {
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            color: #666; max-width: 680px;
+            margin: 0 auto 2.5rem; line-height: 1.7;
+        }
+        .hero-video-wrap {
+            margin-top: 2rem; border-radius: 12px; overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: #f7f8fa; position: relative; aspect-ratio: 16/9;
+        }
+        .video-placeholder {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 0.5rem;
+            color: #999; font-size: 0.85rem;
+            position: absolute; top: 0; left: 0;
+        }
+        .video-placeholder svg { width: 48px; height: 48px; opacity: 0.3; }
+        .video-hint {
+            text-align: center; font-size: 0.75rem;
+            color: #999; margin-top: 0.8rem;
+        }
+
+        /* Sections */
+        section { padding: 5rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            display: inline-block; color: #2563eb;
+            font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+        .section-title {
+            font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            font-weight: 700; color: #111;
+            letter-spacing: -0.02em; margin-bottom: 1rem; line-height: 1.2;
+        }
+        .section-desc {
+            color: #666; font-size: 0.95rem;
+            max-width: 700px; margin-bottom: 2.5rem; line-height: 1.8;
+        }
+
+        /* Abstract */
+        .abstract-section { background: #f7f8fa; border-top: 1px solid rgba(0,0,0,0.05); }
+        .abstract-box {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+            font-size: 0.92rem; line-height: 1.9; color: #555;
+        }
+
+        /* Pipeline / Figure placeholder */
+        .figure-wrap {
+            background: #f7f8fa;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px; padding: 1.5rem;
+            margin-bottom: 2rem; text-align: center;
+        }
+        .figure-placeholder {
+            width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: #aaa; font-size: 0.85rem;
+            border: 2px dashed rgba(0,0,0,0.1); border-radius: 8px;
+        }
+        .figure-placeholder.ratio-pipeline { aspect-ratio: 2.5/1; }
+        .figure-placeholder.ratio-ablation { aspect-ratio: 2/1; }
+        .figure-wrap img {
+            width: 100%; height: auto; border-radius: 8px; display: block;
+        }
+
+        /* Scenario Tabs */
+        .scenario-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .scenario-tab {
+            padding: 0.5rem 1.2rem; border-radius: 100px;
+            font-size: 0.8rem; font-weight: 500; cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.12);
+            background: transparent; color: #666; transition: all 0.2s;
+        }
+        .scenario-tab:hover { border-color: rgba(0,0,0,0.25); color: #333; }
+        .scenario-tab.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+        /* ===== Before / After Demo Cards ===== */
+        .demo-card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.2s;
+        }
+        .demo-card:hover { border-color: rgba(37,99,235,0.3); }
+        .demo-card-header {
+            padding: 0.8rem 1.2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .demo-card-header h3 { font-size: 0.88rem; font-weight: 600; color: #111; }
+        .demo-card-header .card-tag {
+            font-size: 0.68rem; padding: 0.2rem 0.6rem;
+            border-radius: 100px; font-weight: 500;
+        }
+        .tag-ood { background: rgba(239,68,68,0.08); color: #dc2626; }
+        .tag-actor { background: rgba(22,163,74,0.08); color: #16a34a; }
+        .tag-novel { background: rgba(147,51,234,0.08); color: #9333ea; }
+
+        .demo-card-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            position: relative;
+        }
+        .demo-card-body .demo-side {
+            position: relative; aspect-ratio: 16/9;
+            background: #f2f3f5;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .demo-card-body .demo-side video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .demo-side-label {
+            position: absolute; top: 8px; left: 8px;
+            font-size: 0.68rem; font-weight: 600;
+            padding: 0.2rem 0.65rem; border-radius: 6px;
+            backdrop-filter: blur(4px); z-index: 2;
+        }
+        .label-original { background: rgba(255,255,255,0.92); color: #666; border: 1px solid rgba(0,0,0,0.08); }
+        .label-edited  { background: rgba(37,99,235,0.85); color: #fff; }
+
+        .demo-card-body .divider-line {
+            position: absolute; left: 50%; top: 0; bottom: 0;
+            width: 1px;
+            background: rgba(0,0,0,0.1);
+            z-index: 3;
+        }
+        .demo-card-body .divider-badge {
+            position: absolute; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff; border: 1px solid rgba(0,0,0,0.12);
+            color: #888; font-size: 0.6rem; font-weight: 700;
+            padding: 0.25rem 0.5rem; border-radius: 100px;
+            z-index: 4; white-space: nowrap; letter-spacing: 0.05em;
+        }
+        .demo-card-footer {
+            padding: 0.6rem 1.2rem;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            font-size: 0.75rem; color: #888; line-height: 1.5;
+        }
+        .demo-card-footer code {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.72rem;
+            background: rgba(37,99,235,0.07);
+            color: #2563eb;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 640px) {
+            .demo-card-body { grid-template-columns: 1fr; }
+            .demo-card-body .divider-line { display: none; }
+            .demo-card-body .divider-badge {
+                position: static; transform: none;
+                display: block; text-align: center;
+                margin: 0; border-radius: 0;
+                border-left: none; border-right: none;
+            }
+        }
+
+        /* Comparison video blocks */
+        .comparison-video-wrap {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .comparison-video-wrap .comp-video-inner {
+            position: relative; aspect-ratio: 16/9;
+            background: #f2f3f5;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .comparison-video-wrap video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .comparison-video-wrap .comp-video-caption {
+            padding: 0.7rem 1.2rem;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            font-size: 0.78rem; color: #888;
+        }
+
+        /* Table */
+        .results-table-wrap {
+            overflow-x: auto; border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        .results-table {
+            width: 100%; border-collapse: collapse; font-size: 0.8rem;
+        }
+        .results-table th {
+            padding: 0.7rem 1rem; text-align: left;
+            font-weight: 600; color: #888;
+            font-size: 0.72rem; text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            background: #f7f8fa;
+        }
+        .results-table td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            color: #555;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.78rem;
+        }
+        .results-table tr:last-child td { border-bottom: none; }
+        .results-table .best { color: #2563eb; font-weight: 700; }
+        .results-table .row-ours { background: rgba(37,99,235,0.04); }
+        .results-table .row-ours td:first-child { color: #2563eb; font-weight: 600; }
+
+        /* Demos section alternate bg */
+        .demos-bg { background: #f7f8fa; }
+
+        /* Ablation section alternate bg */
+        .ablation-bg { background: #f7f8fa; }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem; text-align: center;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            color: #999; font-size: 0.8rem;
+        }
+
+        /* Scroll animation */
+        .fade-up {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <div class="nav-inner">
+        <div class="logo">Rein<span>Drive</span>Gen</div>
+        <div class="nav-links">
+            <a href="#abstract">Abstract</a>
+            <a href="#method">Method</a>
+            <a href="#demos">Demos</a>
+            <a href="#comparison">Comparison</a>
+            <a href="#ablation">Ablation</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <h1><em>ReinDriveGen</em>: Reinforcement Post-Training for Out-of-Distribution Driving Scene Generation</h1>
+        <p class="subtitle">
+            Full controllability over dynamic driving scenes with RL-based post-training for photorealistic OOD safety-critical scenario generation.
+        </p>
+
+        <!-- Arxiv + Code buttons -->
+        <div class="hero-buttons">
+            <a href="https://arxiv.org/" target="_blank" rel="noopener" class="hero-btn btn-arxiv">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                arXiv Paper
+            </a>
+            <span class="hero-btn btn-code" style="cursor: default;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Code <span class="btn-note">(Coming Soon)</span>
+            </span>
+        </div>
+
+        <div class="hero-video-wrap">
+            <video src="videos/teaser_video.mp4" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+        </div>
+        <div class="video-hint">▲ ReinDriveGen enables photorealistic generation of OOD driving scenarios</div>
+    </div>
+</section>
+
+<!-- Abstract -->
+<section class="abstract-section" id="abstract">
+    <div class="container fade-up">
+        <div class="section-label">Abstract</div>
+        <div class="abstract-box">
+            We present ReinDriveGen, a framework that enables full controllability over dynamic driving scenes, allowing users to freely edit actor trajectories to simulate safety-critical corner cases such as front-vehicle collisions, drifting cars, vehicles spinning out of control, pedestrians jaywalking, and cyclists cutting across lanes. Our approach constructs a dynamic 3D point cloud scene from multi-frame LiDAR data, introduces a vehicle completion module to reconstruct full 360° geometry from partial observations, and renders the edited scene into 2D condition images that guide a video diffusion model. Since such edited scenarios inevitably fall outside the training distribution, we further propose an RL-based post-training strategy with a pairwise preference model and a pairwise reward mechanism, enabling robust quality improvement under out-of-distribution conditions without ground-truth supervision.
+        </div>
+    </div>
+</section>
+
+<!-- Method -->
+<section id="method">
+    <div class="container fade-up">
+        <div class="section-label">Method</div>
+        <div class="section-title">Pipeline Overview</div>
+        <div class="section-desc">
+            Our framework combines explicit 3D point cloud editing with video diffusion synthesis, enhanced by RL post-training for OOD robustness.
+        </div>
+        <div class="figure-wrap">
+            <div class="figure-placeholder ratio-pipeline">
+                <img src="images/pipeline_figure.png" alt="Pipeline overview">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== OOD Demos (Before / After) ========== -->
+<section id="demos" class="demos-bg">
+    <div class="container fade-up">
+        <div class="section-label">Demonstrations</div>
+        <div class="section-title">OOD Safety-Critical Scenarios</div>
+        <div class="section-desc">
+            Each demo shows the <strong style="color:#555">original scene</strong> on the left and our <strong style="color:#2563eb">edited result</strong> on the right.
+        </div>
+
+        <div class="scenario-tabs" id="scenarioTabs">
+            <button class="scenario-tab active" data-filter="all">All</button>
+            <button class="scenario-tab" data-filter="vehicle">Vehicle</button>
+            <button class="scenario-tab" data-filter="vru">Pedestrian / Cyclist</button>
+            <button class="scenario-tab" data-filter="novel">Novel Viewpoint</button>
+        </div>
+
+        <!-- ============================================ -->
+        <!--              VEHICLE  (8 demos)              -->
+        <!-- ============================================ -->
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>🔄 In-place Spinning (Scene 1)</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/spinning_1_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/spinning_1_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>yaw += 180° over 49 frames</code> — Vehicle rotates in-place, an extreme OOD scenario never seen in training.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>🔄 In-place Spinning (Scene 2)</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/spinning_2_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/spinning_2_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>yaw += 135° over 49 frames</code> — Vehicle rotates in-place, an extreme OOD scenario never seen in training.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>🔃 Vehicle Rollover (Scene 1)</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/rollover_1_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/rollover_1_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>roll += 35°</code> — Vehicle tips and rolls.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>🔃 Vehicle Rollover (Scene 2)</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/rollover_2_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/rollover_2_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>roll += 35° </code> — Vehicle tips and rolls.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>🏎️ Vehicle Drifting</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/drifting_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/drifting_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>lateral drift + yaw offset</code> — Vehicle drifts sideways with misaligned heading angle.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>➡ Vehicle Change Lane to Right</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/change_lane_right_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/change_lane_right_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>lateral shift +3m</code> — Vehicle changes to the right lane.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>↱ Vehicle Turn Right</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/turn_right_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/turn_right_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>Right turn</code> — Vehicle makes a right turn at intersection.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vehicle">
+            <div class="demo-card-header">
+                <h3>💥 Vehicle Head-on Collision</h3>
+                <span class="card-tag tag-ood">OOD</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/headon_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/headon_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>two vehicles pushed toward each other</code> — Head-on collision, extreme safety-critical scenario.
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!--        PEDESTRIAN / CYCLIST  (4 demos)       -->
+        <!-- ============================================ -->
+
+        <div class="demo-card" data-category="vru">
+            <div class="demo-card-header">
+                <h3>🚶 Pedestrian Jaywalking (Scene 1)</h3>
+                <span class="card-tag tag-actor">Actor</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/jaywalk_1_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/jaywalk_1_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>pedestrian path → crossing road mid-block</code> — Pedestrian suddenly enters ego lane.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vru">
+            <div class="demo-card-header">
+                <h3>🚶 Pedestrian Jaywalking (Scene 2)</h3>
+                <span class="card-tag tag-actor">Actor</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/jaywalk_2_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/jaywalk_2_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>pedestrian path → crossing road mid-block</code> — Another jaywalking scenario in a different environment.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vru">
+            <div class="demo-card-header">
+                <h3>🚶 Pedestrian Jaywalking (Scene 3)</h3>
+                <span class="card-tag tag-actor">Actor</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/jaywalk_3_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/jaywalk_3_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>pedestrian path → crossing road mid-block</code> — Another jaywalking scenario in a different environment.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="vru">
+            <div class="demo-card-header">
+                <h3>🚴 Cyclist Cut-in</h3>
+                <span class="card-tag tag-actor">Actor</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/cyclist_cutin_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/cyclist_cutin_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>cyclist lateral trajectory → cutting into ego lane</code> — Cyclist cuts in front of ego vehicle.
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!--          NOVEL VIEWPOINT  (4 demos)          -->
+        <!-- ============================================ -->
+
+        <div class="demo-card" data-category="novel">
+            <div class="demo-card-header">
+                <h3>⬅ Ego Shift Left 3m</h3>
+                <span class="card-tag tag-novel">Novel View</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/ego_left_3m_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/ego_left_3m_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>ego lateral -= 3m</code> — Ego viewpoint shifted 3 meters to the left.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="novel">
+            <div class="demo-card-header">
+                <h3>⬅ Ego Shift Left 2m</h3>
+                <span class="card-tag tag-novel">Novel View</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/ego_left_2m_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/ego_left_2m_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>ego lateral -= 2m</code> — Ego viewpoint shifted 2 meters to the left.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="novel">
+            <div class="demo-card-header">
+                <h3>↱ Ego Turn Right</h3>
+                <span class="card-tag tag-novel">Novel View</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/ego_turn_right_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/ego_turn_right_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>ego turn right</code> — Ego viewpoint turns right, novel trajectory.
+            </div>
+        </div>
+
+        <div class="demo-card" data-category="novel">
+            <div class="demo-card-header">
+                <h3>⬆ Ego Shift Up 2m</h3>
+                <span class="card-tag tag-novel">Novel View</span>
+            </div>
+            <div class="demo-card-body">
+                <div class="demo-side">
+                    <video src="videos/ego_up_2m_original.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-original">Original</span>
+                </div>
+                <div class="divider-line"></div>
+                <div class="divider-badge">→ EDIT →</div>
+                <div class="demo-side">
+                    <video src="videos/ego_up_2m_edited.mp4" autoplay loop muted playsinline></video>
+                    <span class="demo-side-label label-edited">Edited (Ours)</span>
+                </div>
+            </div>
+            <div class="demo-card-footer">
+                Edit: <code>ego z += 2m</code> — Elevated viewpoint, OOD camera height.
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Comparison -->
+<section id="comparison">
+    <div class="container fade-up">
+        <div class="section-label">Comparison</div>
+        <div class="section-title">Baseline Comparisons</div>
+        <div class="section-desc">
+            Side-by-side comparison with existing methods on novel ego trajectory and vehicle trajectory editing tasks.
+        </div>
+
+        <div class="comparison-video-wrap">
+            <div class="comp-video-inner">
+                <video src="videos/comparison_ego_trajectory.mp4" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+            </div>
+            <div class="comp-video-caption">Novel Ego Trajectory — Comparison across DriveDreamer4D, DeformableGS, Street Gaussians, ReconDreamer, and Ours.</div>
+        </div>
+
+        <div class="comparison-video-wrap">
+            <div class="comp-video-inner">
+                <video src="videos/comparison_vehicle_editing.mp4" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+            </div>
+            <div class="comp-video-caption">Vehicle Trajectory Editing — Comparison across Street Gaussians, StreetCrafter, and Ours.</div>
+        </div>
+
+        <!-- Quantitative Table -->
+        <div style="margin-top: 3rem;">
+            <div class="section-desc"><strong style="color:#333;">Quantitative Results</strong></div>
+            <div class="results-table-wrap">
+                <table class="results-table">
+                    <thead>
+                        <tr><th>Method</th><th>NTA-IoU ↑</th><th>NTL-IoU ↑</th><th>FID ↓</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>PVG</td><td>0.256</td><td>50.70</td><td>105.29</td></tr>
+                        <tr><td>S³Gaussian</td><td>0.175</td><td>49.05</td><td>124.90</td></tr>
+                        <tr><td>DD4D w/ S³Gauss.</td><td>0.495</td><td>53.42</td><td>66.93</td></tr>
+                        <tr><td>Recon. w/ S³Gauss.</td><td>0.413</td><td>51.62</td><td>123.61</td></tr>
+                        <tr><td>Deform.-GS</td><td>0.240</td><td>51.62</td><td>92.24</td></tr>
+                        <tr class="row-ours"><td>Ours</td><td class="best">0.549</td><td class="best">56.13</td><td class="best">51.99</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- RL Ablation -->
+<section id="ablation" class="ablation-bg">
+    <div class="container fade-up">
+        <div class="section-label">Ablation</div>
+        <div class="section-title">RL Post-Training Progression</div>
+        <div class="section-desc">
+            As RL training progresses, vehicles exhibit progressively better geometry, texture fidelity, and lighting plausibility.
+        </div>
+
+        <div class="figure-wrap">
+            <div class="figure-wrap">
+                <img src="images/rl_ablation_figure.png" alt="RL post-training progression">
+            </div>            
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>ReinDriveGen — Anonymous ECCV 2026 Submission</p>
+</footer>
+
+<script>
+    // Scroll animation
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Scenario filter tabs
+    document.querySelectorAll('.scenario-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const filter = tab.dataset.filter;
+            document.querySelectorAll('.demo-card').forEach(card => {
+                if (filter === 'all' || card.dataset.category === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
